@@ -5,6 +5,7 @@ import ThemeSidebar from './components/ThemeSidebar';
 import Header from './components/Header';
 import LoginForm from './components/LoginForm';
 import SignupForm from './components/SignupForm';
+import SlideList from './components/SlideList';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
 const ProtectedRoute = ({ children }) => {
@@ -25,6 +26,11 @@ function App() {
               <Route path="/" element={
                 <ProtectedRoute>
                   <SlideEditor />
+                </ProtectedRoute>
+              } />
+              <Route path="/slides" element={
+                <ProtectedRoute>
+                  <SlideList />
                 </ProtectedRoute>
               } />
             </Routes>

@@ -2,19 +2,41 @@ import { Box, HStack, IconButton, Select, Input, useColorMode } from '@chakra-ui
 import { useState } from 'react';
 import { FaBold, FaItalic, FaUnderline, FaAlignLeft, FaAlignCenter, FaAlignRight, FaImage } from 'react-icons/fa';
 
+/**
+ * ToolbarPanel Component
+ * 
+ * A toolbar component providing text formatting and image upload controls.
+ * Features:
+ * - Text formatting buttons (bold, italic, underline)
+ * - Text alignment controls
+ * - Font size selection
+ * - Image upload functionality
+ * 
+ * @param {string} selectedElement - Currently selected slide element
+ * @param {Function} onContentChange - Callback for content updates
+ * @param {Function} onThemeChange - Callback for theme updates
+ */
 const ToolbarPanel = ({ selectedElement, onContentChange, onThemeChange }) => {
+  // State management for font size and color mode
   const [fontSize, setFontSize] = useState('16');
   const { colorMode } = useColorMode();
 
+  /**
+   * Updates font size for the selected element
+   * @param {string} value - The new font size value
+   */
   const handleFontSizeChange = (value) => {
     setFontSize(value);
-    if (selectedElement) {
+    if (selectedElement) {upload-image
       onThemeChange({
         [`${selectedElement}FontSize`]: `${value}px`
       });
     }
   };
 
+  /**
+   * Triggers the hidden file input for image upload
+   */
   const handleImageUpload = () => {
     document.getElementById('image-upload').click();
   };

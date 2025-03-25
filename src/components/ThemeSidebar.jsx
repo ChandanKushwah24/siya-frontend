@@ -1,10 +1,24 @@
 import { Box, VStack, Text, Input, Select, useColorMode } from '@chakra-ui/react';
 import { useState } from 'react';
 
+/**
+ * ThemeSidebar Component
+ * 
+ * A sidebar panel for customizing slide appearance including colors and fonts.
+ * Provides controls for:
+ * - Background color selection
+ * - Text color selection
+ * - Font family selection
+ * 
+ * @param {Object} theme - Current theme settings
+ * @param {Function} onThemeChange - Callback for theme updates
+ */
 const ThemeSidebar = ({ theme, onThemeChange }) => {
+  // Hooks for managing color mode and selected color state
   const { colorMode } = useColorMode();
   const [selectedColor, setSelectedColor] = useState(theme.backgroundColor);
 
+  // Available font options for the slide
   const fontFamilies = [
     'Arial',
     'Helvetica',
@@ -15,6 +29,11 @@ const ThemeSidebar = ({ theme, onThemeChange }) => {
     'Open Sans'
   ];
 
+  /**
+   * Handles color changes for background and text
+   * @param {string} type - The type of color to change (backgroundColor or textColor)
+   * @param {string} value - The new color value in hex format
+   */
   const handleColorChange = (type, value) => {
     onThemeChange({
       [type]: value

@@ -5,16 +5,33 @@ import EditableSlide from './EditableSlide';
 import ThemeSidebar from './ThemeSidebar';
 import ToolbarPanel from './ToolbarPanel';
 import TemplateSelector from './TemplateSelector';
+import { useNavigate } from 'react-router-dom';
 
+/**
+ * SlideEditor Component
+ * 
+ * A comprehensive slide editor that allows users to create and edit presentation slides.
+ * Features include:
+ * - Text editing with rich formatting
+ * - Image upload and manipulation
+ * - Theme customization
+ * - Template selection
+ * - Auto-saving and navigation
+ */
 const SlideEditor = () => {
-  const [selectedElement, setSelectedElement] = useState(null);
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const toast = useToast();
+  // Hooks for navigation and UI state management
+  const navigate = useNavigate();
+  const [selectedElement, setSelectedElement] = useState(null);  // Tracks currently selected slide element
+  const { isOpen, onOpen, onClose } = useDisclosure();  // Controls template selector modal
+  const toast = useToast();  // For displaying status messages
+
+  // Main slide content state including theme settings
   const [slideContent, setSlideContent] = useState({
     title: 'Click to edit title',
     subtitle: 'Click to edit subtitle',
     content: 'Click to edit content',
     images: [],
+    selectedFiles: [],
     theme: {
       backgroundColor: '#ffffff',
       textColor: '#000000',
@@ -25,6 +42,11 @@ const SlideEditor = () => {
     }
   });
 
+  /**
+   * Updates slide content for a specific field
+   * @param {string} key - The field to update (title, subtitle, content, etc.)
+   * @param {any} value - The new value for the field
+   */
   const handleContentChange = (key, value) => {
     setSlideContent(prev => ({
       ...prev,
@@ -32,6 +54,10 @@ const SlideEditor = () => {
     }));
   };
 
+  /**
+   * Updates theme settings while preserving other theme properties
+   * @param {Object} themeUpdates - Object containing theme properties to update
+   */
   const handleThemeChange = (themeUpdates) => {
     setSlideContent(prev => ({
       ...prev,
@@ -42,10 +68,18 @@ const SlideEditor = () => {
     }));
   };
 
+  /**
+   * Updates the currently selected element for editing
+   * @param {Object|string} element - The selected element or element identifier
+   */
   const handleElementSelect = (element) => {
     setSelectedElement(element);
   };
 
+  /**
+   * Applies selected template to the current slide
+   * @param {Object} template - Template containing layout and theme settings
+   */
   const handleTemplateSelect = (template) => {
     setSlideContent(prev => ({
       ...prev,
@@ -55,27 +89,64 @@ const SlideEditor = () => {
     onClose();
   };
 
+  /**
+   * Saves the slide content and uploads any associated images
+   * Handles both slide data persistence and image upload to server
+   */
   const handleSaveSlide = async () => {
+    const token = localStorage.getItem('token') ? localStorage.getItem('token') : "";
     try {
       const response = await fetch(`${API_CONFIG.baseURL}/slides`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify(slideContent),
       });
       
-      if (response.ok) {
-        toast({
-          title: 'Success',
-          description: 'Slide saved successfully',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        });
-      } else {
-        throw new Error('Failed to save slide');
+      if (!response.ok) {
+        throw new Error('Failed to create slide');
       }
+      
+      const slideData = await response.json();
+      const slideId = slideData.id;
+      
+      // Upload images one by one
+      const newImages = slideContent.selectedFiles;
+      const uploadedImageUrls = [];
+
+      for (const file of newImages) {
+        const formData = new FormData();
+        formData.append('slideId', slideId);
+        formData.append('file', file);
+
+        const uploadResponse = await fetch(`${API_CONFIG.baseURL}/upload-image`, {
+          method: 'POST',
+          headers: {
+            "Authorization": `Bearer ${token}`
+          },
+          body: formData
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error(`Failed to upload image: ${file.name}`);
+        }
+
+        const uploadData = await uploadResponse.json();
+        uploadedImageUrls.push(uploadData.image_data);
+      }
+
+      toast({
+        title: 'Success',
+        description: 'Slide and images saved successfully',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+      
+      // Navigate to the slides list
+      navigate('/slides');
     } catch (error) {
       toast({
         title: 'Error',
@@ -94,7 +165,7 @@ const SlideEditor = () => {
           <Button colorScheme="blue" onClick={onOpen}>Choose Template</Button>
           <Button colorScheme="green" onClick={handleSaveSlide}>Save Slide</Button>
         </HStack>
-        {isOpen && <TemplateSelector onTemplateSelect={handleTemplateSelect} />}
+        <TemplateSelector isOpen={isOpen} onClose={onClose} onTemplateSelect={handleTemplateSelect} />
         <ToolbarPanel
           selectedElement={selectedElement}
           onContentChange={handleContentChange}

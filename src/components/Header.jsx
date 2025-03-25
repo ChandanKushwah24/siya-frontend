@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Spacer, Link as ChakraLink } from '@chakra-ui/react';
+import { Box, Button, Flex, Spacer, Link as ChakraLink, HStack } from '@chakra-ui/react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -19,9 +19,21 @@ const Header = () => {
         </ChakraLink>
         <Spacer />
         {user ? (
-          <Button colorScheme="whiteAlpha" onClick={handleLogout}>
-            Logout
-          </Button>
+          <HStack spacing={4}>
+            <ChakraLink as={RouterLink} to="/slides">
+              <Button colorScheme="whiteAlpha" variant="outline">
+                Slider List
+              </Button>
+            </ChakraLink>
+            <ChakraLink as={RouterLink} to="/">
+              <Button colorScheme="whiteAlpha" variant="outline">
+                Create Slider
+              </Button>
+            </ChakraLink>
+            <Button colorScheme="whiteAlpha" onClick={handleLogout}>
+              Logout
+            </Button>
+          </HStack>
         ) : (
           <Flex gap={4}>
             <ChakraLink as={RouterLink} to="/login">

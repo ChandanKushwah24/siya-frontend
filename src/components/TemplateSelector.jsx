@@ -1,8 +1,7 @@
-import { Box, SimpleGrid, Text, useColorMode, Image } from '@chakra-ui/react';
+import { Box, SimpleGrid, Text, useColorMode, Image, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton } from '@chakra-ui/react';
 import { API_CONFIG } from '../config';
 import { useState, useEffect } from 'react';
-
-const TemplateSelector = ({ onTemplateSelect }) => {
+const TemplateSelector = ({ onTemplateSelect, isOpen, onClose }) => {
   const [templates, setTemplates] = useState([]);
   const { colorMode } = useColorMode();
 
@@ -11,8 +10,16 @@ const TemplateSelector = ({ onTemplateSelect }) => {
   }, []);
 
   const fetchTemplates = async () => {
+    const token = localStorage.getItem('token') ? localStorage.getItem('token') : "";
+
     try {
-      const response = await fetch(`${API_CONFIG.baseURL}/templates`);
+      const response = await fetch(`${API_CONFIG.baseURL}/templates`, {
+        method: 'GET',
+        headers: {
+          "Content-Type": "application/json",
+          "authorization": `Bearer ${token}` 
+        },
+      });
       const data = await response.json();
       setTemplates(data);
     } catch (error) {
@@ -21,17 +28,16 @@ const TemplateSelector = ({ onTemplateSelect }) => {
   };
 
   return (
-    <Box
-      bg={colorMode === 'dark' ? 'gray.700' : 'white'}
-      p={4}
-      borderRadius="md"
-      boxShadow="sm"
-      mb={4}
-    >
-      <Text fontSize="lg" fontWeight="bold" mb={4}>
-        Select Template
-      </Text>
-      <SimpleGrid columns={3} spacing={4}>
+    <Modal isOpen={isOpen} onClose={onClose} size="xl">
+      <ModalOverlay />
+      <ModalContent
+        bg={colorMode === 'dark' ? 'gray.700' : 'white'}
+        maxW="900px"
+      >
+        <ModalHeader>Select Template</ModalHeader>
+        <ModalCloseButton />
+        <ModalBody pb={6}>
+          <SimpleGrid columns={3} spacing={4}>
         {templates.map((template) => (
           <Box
             key={template.id}
@@ -53,8 +59,10 @@ const TemplateSelector = ({ onTemplateSelect }) => {
             </Text>
           </Box>
         ))}
-      </SimpleGrid>
-    </Box>
+          </SimpleGrid>
+        </ModalBody>
+      </ModalContent>
+    </Modal>
   );
 };
 

@@ -25,7 +25,8 @@ export function AuthProvider({ children }) {
       const response = await fetch(`${API_CONFIG.baseURL}/login`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+           "Content-Type": "application/json",
+          Authorization: "Bearer "
         },
         body: JSON.stringify({ email, password }),
       });
@@ -44,12 +45,13 @@ export function AuthProvider({ children }) {
     }
   };
 
+
   const signup = async (userData) => {
     try {
       const response = await fetch(`${API_CONFIG.baseURL}/signup`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json"
         },
         body: JSON.stringify(userData),
       });
